@@ -1,0 +1,89 @@
+AI Tech Interview — Proprietary Source-Available License
+Version 1.0, October 2026
+https://github.com/A24-0/ai-tech-interview
+
+Copyright (c) 2026 Yuri Eliseev, Angelina Grishutina, Egor Ostrovsky, Danila Zabotkin.
+All rights reserved.
+
+1. Ownership.
+   AI Tech Interview, including its source code, documentation, prompts, question banks,
+   rubrics, designs and other materials in this repository (the "Software"), is the
+   property of the copyright holders listed above (the "Authors").
+
+2. Permitted use.
+   You may view the Software on GitHub for the purposes of evaluation and academic
+   review only. Forking within GitHub, to the extent required by the GitHub Terms of
+   Service, is permitted solely for viewing and does not grant any further rights.
+
+3. Restrictions.
+   Without the prior written permission of all Authors, you may NOT:
+   a) use, run, deploy or host the Software or any part of it, for any purpose,
+      commercial or non-commercial;
+   b) copy, modify, translate, adapt or create derivative works based on the Software;
+   c) distribute, publish, sublicense, sell, rent or lend the Software or any part of it;
+   d) offer the Software or its functionality as a service (SaaS) to third parties;
+   e) use the Software, its prompts, data or outputs to train or evaluate machine
+      learning models;
+   f) remove or alter any copyright, authorship or license notices.
+
+4. Contributions.
+   Contributions are accepted only from the Authors or under a separate written
+   agreement with them.
+
+5. Licensing.
+   Commercial and other licenses are available on request: <email>
+
+6. No warranty.
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+   IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE.
+
+7. Third-party components.
+   Third-party libraries used by the Software are subject to their own licenses.
+
+---------------------------------------------------------------------------------
+
+AI Tech Interview — Проприетарная лицензия с открытым исходным кодом для просмотра
+Версия 1.0, октябрь 2026
+https://github.com/A24-0/ai-tech-interview
+
+© 2026 Елисеев Юрий, Гришутина Ангелина, Островский Егор, Заботкин Данила.
+Все права защищены.
+
+1. Правообладатели.
+   AI Tech Interview, включая исходный код, документацию, промпты, банки вопросов,
+   критерии оценки, дизайн и иные материалы данного репозитория (далее — «ПО»),
+   является объектом исключительных прав указанных выше авторов (далее — «Авторы»).
+
+2. Разрешённое использование.
+   Допускается только просмотр ПО на GitHub в целях ознакомления и учебной проверки.
+   Создание форка средствами GitHub в объёме, предусмотренном правилами GitHub,
+   допускается исключительно для просмотра и не предоставляет иных прав.
+
+3. Ограничения.
+   Без предварительного письменного согласия всех Авторов запрещается:
+   а) использовать, запускать, развёртывать или размещать ПО или его части
+      в любых целях, коммерческих и некоммерческих;
+   б) копировать, изменять, переводить, адаптировать ПО и создавать производные работы;
+   в) распространять, публиковать, сублицензировать, продавать, сдавать в аренду ПО;
+   г) предоставлять ПО или его функциональность третьим лицам как сервис (SaaS);
+   д) использовать ПО, его промпты, данные или результаты работы для обучения
+      или оценки моделей машинного обучения;
+   е) удалять или изменять уведомления об авторских правах и лицензии.
+
+4. Вклад в проект.
+   Изменения принимаются только от Авторов либо на основании отдельного письменного
+   соглашения с ними.
+
+5. Лицензирование.
+   Коммерческие и иные лицензии предоставляются по запросу: <email>
+
+6. Отказ от гарантий.
+   ПО ПРЕДОСТАВЛЯЕТСЯ «КАК ЕСТЬ», БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ. АВТОРЫ НЕ НЕСУТ
+   ОТВЕТСТВЕННОСТИ ЗА ЛЮБОЙ УЩЕРБ, СВЯЗАННЫЙ С ИСПОЛЬЗОВАНИЕМ ПО.
+
+7. Сторонние компоненты.
+   Используемые сторонние библиотеки распространяются на условиях собственных лицензий.
+
+В случае расхождения текстов на русском и английском языках приоритет имеет текст
+на русском языке.
