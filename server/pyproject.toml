@@ -1,0 +1,30 @@
+[project]
+name = "ai-tech-interview-server"
+version = "0.1.0"
+description = "AI Tech Interview: API, background worker, AI layer and sandbox adapters"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.11,<3",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27",
+]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
