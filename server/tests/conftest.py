@@ -131,6 +131,20 @@ async def create_task(factory: async_sessionmaker[AsyncSession], *, title: str =
         )
 
 
+async def create_run(
+    factory: async_sessionmaker[AsyncSession], session_id: uuid.UUID, code_task_id: int, *, code: str = "pass"
+) -> uuid.UUID:
+    from app.domain.code_runs import code_hash
+    from app.infrastructure.db.code_runs import CodeRunModel
+
+    run = CodeRunModel(
+        session_id=session_id, code_task_id=code_task_id, client_run_id=uuid.uuid4(), code=code, code_hash=code_hash(code)
+    )
+    async with factory() as db, db.begin():
+        db.add(run)
+    return run.id
+
+
 async def create_session(
     factory: async_sessionmaker[AsyncSession],
     user_id: uuid.UUID,
