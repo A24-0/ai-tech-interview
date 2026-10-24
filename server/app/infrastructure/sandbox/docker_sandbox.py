@@ -1,6 +1,5 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-"""DockerSandbox: runner.py in a throwaway container with the ADR-002 limits (SANDBOX_BACKEND=docker)."""
 
 import asyncio
 import logging
@@ -57,7 +56,6 @@ class DockerSandbox:
         return {
             "image": s.image,
             "stdin_open": True,
-            "stdin_once": True,
             "network_disabled": True,
             "mem_limit": f"{s.memory_mb}m",
             "memswap_limit": f"{s.memory_mb}m",
@@ -108,7 +106,7 @@ class DockerSandbox:
             container.start()
             raw.sendall(payload)
         finally:
-            # With stdin_once the container's stdin gets EOF once this attach is closed.
+            # create() without detach makes the SDK set StdinOnce, so closing this attach gives EOF.
             raw.close()
             if raw is not sock:
                 sock.close()
