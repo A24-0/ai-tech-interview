@@ -8,7 +8,9 @@ import pytest
 from app.infrastructure.ai import get_chat_provider
 from app.infrastructure.ai.fake import FakeChatProvider
 from app.infrastructure.sandbox import get_sandbox
+from app.infrastructure.sandbox.docker_sandbox import DockerSandbox
 from app.infrastructure.sandbox.fake import FakeSandbox
+from app.infrastructure.sandbox.subprocess_sandbox import SubprocessSandbox
 
 
 @pytest.fixture(autouse=True)
@@ -52,12 +54,17 @@ def test_sandbox_defaults_to_fake_singleton(monkeypatch: pytest.MonkeyPatch) -> 
     assert get_sandbox() is sandbox
 
 
-@pytest.mark.parametrize("backend", ["docker", "subprocess"])
-def test_sandbox_real_backends_not_implemented_yet(monkeypatch: pytest.MonkeyPatch, backend: str) -> None:
+@pytest.mark.parametrize(
+    ("backend", "expected"), [("docker", DockerSandbox), ("subprocess", SubprocessSandbox)]
+)
+def test_sandbox_real_backends(monkeypatch: pytest.MonkeyPatch, backend: str, expected: type) -> None:
     monkeypatch.setenv("SANDBOX_BACKEND", backend)
+    monkeypatch.setenv("SANDBOX_TIMEOUT_S", "3")
 
-    with pytest.raises(NotImplementedError):
-        get_sandbox()
+    sandbox = get_sandbox()
+
+    assert isinstance(sandbox, expected)
+    assert sandbox.settings.timeout_s == 3  # type: ignore[attr-defined]
 
 
 def test_sandbox_unknown_value(monkeypatch: pytest.MonkeyPatch) -> None:
