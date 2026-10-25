@@ -1,6 +1,5 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-"""Sandbox contracts: RunResult produced by runner.py (contract 6.3, 6.5) and the Sandbox protocol (7)."""
 
 from typing import Any, ClassVar, Literal, Protocol
 
@@ -44,7 +43,7 @@ class RunResult(CamelModel):
 
 
 class SandboxError(Exception):
-    """Failure of the sandbox itself, not of the user's code. The run becomes `failed`."""
+    ...
 
 
 class Sandbox(Protocol):
@@ -55,8 +54,4 @@ class Sandbox(Protocol):
         tests: list[dict[str, Any]],
         limits: dict[str, Any],
     ) -> RunResult:
-        """Run `code` against `tests` (format of code_tasks.tests, contract 6.5).
-
-        Timeouts are reported as verdict "timeout"; only SandboxError is raised.
-        """
         ...

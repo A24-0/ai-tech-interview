@@ -1,12 +1,7 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-"""SubprocessSandbox: runner.py as a local process with rlimits (SANDBOX_BACKEND=subprocess).
 
-Fallback from ADR-002 for development and tests without Docker. It limits time, CPU and
-(on Linux) memory, but does NOT isolate network or the filesystem: never use it in production.
-RLIMIT_NPROC is not set: it counts every process of the user, not only the run's.
-"""
-
+# Dev fallback: no network or filesystem isolation, not for production.
 import asyncio
 import os
 import resource

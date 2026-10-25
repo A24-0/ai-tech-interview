@@ -1,6 +1,5 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-"""FakeChatProvider: deterministic ChatProvider for development and tests (LLM_PROVIDER=fake)."""
 
 import asyncio
 import itertools
@@ -40,8 +39,6 @@ class FakeCall:
 
 
 class FakeChatProvider:
-    """`stream` yields `text` in chunks of 3–5 words; `complete_json` returns a preset dict by schema name."""
-
     def __init__(
         self,
         text: str = DEFAULT_TEXT,

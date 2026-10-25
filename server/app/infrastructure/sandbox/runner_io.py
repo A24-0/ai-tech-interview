@@ -1,6 +1,5 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-"""Shared by sandbox backends: settings, runner.py stdin payload and stdout parsing (contract 6.5)."""
 
 import json
 import os
@@ -32,7 +31,6 @@ class SandboxSettings:
 
     @property
     def hard_timeout_s(self) -> float:
-        """Overall wall-clock budget before the run is killed: SANDBOX_TIMEOUT_S + 1 s."""
         return self.timeout_s + 1
 
     @classmethod
@@ -61,7 +59,6 @@ def build_payload(code: str, entry: str, tests: list[dict[str, Any]], limits: di
 
 
 def find_result(stdout: bytes, nonce: str) -> RunResult | None:
-    """RunResult from the last stdout line starting with nonce; None if there is no such line."""
     for line in reversed(stdout.decode("utf-8", errors="replace").splitlines()):
         if line.startswith(nonce):
             try:

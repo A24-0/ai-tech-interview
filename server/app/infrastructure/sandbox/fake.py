@@ -1,6 +1,5 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-"""FakeSandbox: fixed RunResult without running any code (SANDBOX_BACKEND=fake)."""
 
 import asyncio
 from typing import Any
@@ -9,8 +8,6 @@ from app.domain.sandbox import CodeMetrics, RunResult, TestCaseResult
 
 
 class FakeSandbox:
-    """2 of 3 tests pass (verdict "failed"); code with `while True` gives "timeout" after `timeout_delay_s`."""
-
     def __init__(self, *, timeout_delay_s: float = 1.0) -> None:
         self.timeout_delay_s = timeout_delay_s
 
