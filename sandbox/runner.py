@@ -1,15 +1,7 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-"""Sandbox runner: checks a solution against tests and prints a RunResult (contract 6.3, 6.5).
 
-stdin:  {"code", "entry", "tests", "limits": {"perTestTimeoutMs", "maxOutputBytes"}, "nonce"}
-stdout: the only line is <nonce>{RunResult JSON}.
-
-The user's code is never imported here: metrics come from `ast`, every test runs in its
-own `python -I -S` process. The nonce never leaves this process, so user output cannot
-forge the result line.
-"""
-
+# stdin: JSON with code, entry, tests, limits, nonce. stdout: one line, <nonce><RunResult JSON>.
 import ast
 import json
 import math
@@ -110,8 +102,6 @@ else:
 
 
 class Capture(threading.Thread):
-    """Drains a pipe, keeping at most `limit` bytes so a flood of output cannot exhaust memory."""
-
     def __init__(self, fd: int, limit: int) -> None:
         super().__init__(daemon=True)
         self.fd = fd
@@ -205,7 +195,6 @@ class _MetricsVisitor(ast.NodeVisitor):
 
 
 def analyze(code: str) -> tuple[Metrics, str | None]:
-    """Static metrics without executing the code; second item is a syntax error message."""
     metrics = Metrics(lines=sum(1 for line in code.splitlines() if line.strip()))
     try:
         tree = ast.parse(code, filename="solution.py")

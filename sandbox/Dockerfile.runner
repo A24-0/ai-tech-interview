@@ -1,8 +1,7 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-#
-# Sandbox image: docker build -f sandbox/Dockerfile.runner -t interview-sandbox:latest sandbox
-# Runtime limits (network, memory, pids, read-only rootfs, tmpfs /tmp) are set by DockerSandbox.
+
+# Runtime limits are set by DockerSandbox
 FROM python:3.12-slim
 
 COPY runner.py /runner/runner.py

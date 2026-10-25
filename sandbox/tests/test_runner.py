@@ -1,6 +1,5 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-"""runner.py as a plain subprocess, without Docker."""
 
 import json
 import subprocess
