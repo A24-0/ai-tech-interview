@@ -7,6 +7,7 @@ import pytest
 
 from app.infrastructure.ai import get_chat_provider
 from app.infrastructure.ai.fake import FakeChatProvider
+from app.infrastructure.ai.openai_compatible import OpenAICompatibleChatProvider
 from app.infrastructure.sandbox import get_sandbox
 from app.infrastructure.sandbox.docker_sandbox import DockerSandbox
 from app.infrastructure.sandbox.fake import FakeSandbox
@@ -31,10 +32,25 @@ def test_chat_provider_defaults_to_fake_singleton(monkeypatch: pytest.MonkeyPatc
     assert get_chat_provider() is provider
 
 
-def test_chat_provider_openai_compatible_not_implemented_yet(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_chat_provider_openai_compatible_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("LLM_PROVIDER", "openai_compatible")
+    monkeypatch.setenv("LLM_BASE_URL", "https://llm.example/v1/")
+    monkeypatch.setenv("LLM_MODEL", "test-model")
+    monkeypatch.setenv("LLM_MAX_RETRIES", "1")
 
-    with pytest.raises(NotImplementedError):
+    provider = get_chat_provider()
+
+    assert isinstance(provider, OpenAICompatibleChatProvider)
+    assert provider.settings.base_url == "https://llm.example/v1"
+    assert provider.settings.max_retries == 1
+
+
+def test_chat_provider_openai_compatible_needs_url_and_model(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LLM_PROVIDER", "openai_compatible")
+    monkeypatch.delenv("LLM_BASE_URL", raising=False)
+    monkeypatch.delenv("LLM_MODEL", raising=False)
+
+    with pytest.raises(ValueError):
         get_chat_provider()
 
 
