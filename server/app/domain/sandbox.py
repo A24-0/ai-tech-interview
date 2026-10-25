@@ -42,6 +42,15 @@ class RunResult(CamelModel):
     metrics: CodeMetrics = Field(default_factory=CodeMetrics)
 
 
+class CodeTaskDTO(CamelModel):
+    id: int
+    title: str
+    statement: str
+    starter_code: str = ""
+    entry: str = "solve"
+    tests: list[dict[str, Any]] = Field(default_factory=list)
+
+
 class SandboxError(Exception):
     ...
 
