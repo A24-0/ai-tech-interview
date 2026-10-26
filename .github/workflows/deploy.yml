@@ -1,0 +1,60 @@
+name: deploy
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to deploy or roll back to, for example v1.2.3"
+        required: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.tag.outputs.value }}
+    steps:
+      - id: tag
+        run: echo "value=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.value }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push sandbox image
+        run: |
+          docker build -f sandbox/Dockerfile.runner -t "$IMAGE_PREFIX/sandbox:${{ steps.tag.outputs.value }}" sandbox
+          docker push "$IMAGE_PREFIX/sandbox:${{ steps.tag.outputs.value }}"
+      - name: Build and push server image
+        if: hashFiles('server/Dockerfile') != ''
+        run: |
+          docker build -t "$IMAGE_PREFIX/server:${{ steps.tag.outputs.value }}" server
+          docker push "$IMAGE_PREFIX/server:${{ steps.tag.outputs.value }}"
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Roll out over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+            echo "${{ needs.build.outputs.tag }}" > .release
+            IMAGE_TAG="${{ needs.build.outputs.tag }}" docker compose pull
+            IMAGE_TAG="${{ needs.build.outputs.tag }}" docker compose up -d
