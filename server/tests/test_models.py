@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.infrastructure.db.base import Base
-from app.infrastructure.db.models import InterviewSession, Message
+from app.infrastructure.db.models import InterviewSession, Message, Question, Topic
 from app.infrastructure.db.session import make_session_factory
 
 
@@ -65,3 +65,41 @@ async def test_invalid_level_rejected(db):
         s.add(InterviewSession(user_id=uuid.uuid4(), topic_id=1, level="expert"))
         with pytest.raises(IntegrityError):
             await s.commit()
+
+
+async def test_one_answer_per_user_message(db):
+    async with db() as s:
+        session = new_session(uuid.uuid4())
+        s.add(session)
+        await s.flush()
+        question = Message(session_id=session.id, role="user", content="ответ", client_message_id=uuid.uuid4())
+        s.add(question)
+        await s.flush()
+        s.add(Message(session_id=session.id, role="assistant", content="a", reply_to_id=question.id))
+        await s.commit()
+        s.add(Message(session_id=session.id, role="assistant", content="b", reply_to_id=question.id))
+        with pytest.raises(IntegrityError):
+            await s.commit()
+
+
+async def test_bank_keys_are_unique_per_topic(db):
+    async with db() as s:
+        python, go = Topic(code="python_basics", title="Python"), Topic(code="go_basics", title="Go")
+        s.add_all([python, go])
+        await s.flush()
+        s.add_all(
+            Question(topic_id=t.id, level="junior", text="Что такое срез?", expected_answer="...") for t in (python, go)
+        )
+        await s.commit()
+        s.add(Question(topic_id=python.id, level="middle", text="Что такое срез?", expected_answer="..."))
+        with pytest.raises(IntegrityError):
+            await s.commit()
+
+
+async def test_new_session_counters_start_at_zero(db):
+    async with db() as s:
+        session = new_session(uuid.uuid4())
+        s.add(session)
+        await s.commit()
+        assert (session.questions_asked, session.tokens_used, session.code_task_id) == (0, 0, None)
+        assert session.last_activity_at is not None
