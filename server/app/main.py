@@ -4,7 +4,7 @@
 
 from fastapi import FastAPI
 
-from app.api import interviews, runs
+from app.api import admin, interviews, runs
 from app.api.errors import install_error_handlers
 
 
@@ -13,6 +13,7 @@ def create_app() -> FastAPI:
     install_error_handlers(app)
     app.include_router(interviews.router, prefix="/api")
     app.include_router(runs.router, prefix="/api")
+    app.include_router(admin.router, prefix="/api")
     return app
 
 
