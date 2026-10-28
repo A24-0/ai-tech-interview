@@ -1,0 +1,35 @@
+name: sandbox
+
+on:
+  pull_request:
+    paths:
+      - "server/**"
+      - "sandbox/**"
+      - ".github/workflows/sandbox.yml"
+  push:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install server
+        run: pip install -e "server[dev]"
+      - name: Server tests
+        working-directory: server
+        run: python -m pytest -q
+      - name: Types
+        working-directory: server
+        run: python -m mypy --strict app
+      - name: Build sandbox image
+        run: docker build -f sandbox/Dockerfile.runner -t interview-sandbox:latest sandbox
+      - name: Runner tests
+        run: python -m pytest sandbox/tests -q --ignore=sandbox/tests/evil --ignore=sandbox/tests/load
+      - name: Hostile code
+        run: python -m pytest sandbox/tests/evil -q
+      - name: Parallel runs
+        run: python -m pytest sandbox/tests/load -q

@@ -7,6 +7,7 @@ from functools import cache
 
 from app.domain.sandbox import Sandbox
 from app.infrastructure.sandbox.fake import FakeSandbox
+from app.infrastructure.sandbox.runner_io import SandboxSettings
 
 
 @cache
@@ -15,8 +16,12 @@ def get_sandbox() -> Sandbox:
     backend = os.environ.get("SANDBOX_BACKEND", "fake").strip().lower()
     if backend == "fake":
         return FakeSandbox()
-    if backend in ("docker", "subprocess"):
-        raise NotImplementedError(
-            f"SANDBOX_BACKEND={backend} is not implemented yet; use SANDBOX_BACKEND=fake for now"
-        )
+    if backend == "docker":
+        from app.infrastructure.sandbox.docker_sandbox import DockerSandbox
+
+        return DockerSandbox(SandboxSettings.from_env())
+    if backend == "subprocess":
+        from app.infrastructure.sandbox.subprocess_sandbox import SubprocessSandbox
+
+        return SubprocessSandbox(SandboxSettings.from_env())
     raise ValueError(f"Unknown SANDBOX_BACKEND={backend!r}; expected fake, docker or subprocess")
