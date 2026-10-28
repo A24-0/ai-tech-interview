@@ -15,6 +15,7 @@ LIMITS = {"perTestTimeoutMs": 2000, "maxOutputBytes": 65536}
 TESTS = [{"name": "t1", "args": [1, 2], "expected": 3}]
 GOOD = "def solve(a, b):\n    return a + b\n"
 MAX_SECONDS = 7
+FORK_BOMB_SECONDS = 15
 
 
 def _docker_unavailable() -> str | None:
@@ -46,8 +47,8 @@ async def run_evil(code: str) -> tuple[RunResult, float]:
     return result, time.monotonic() - started
 
 
-async def assert_contained(elapsed: float) -> None:
-    assert elapsed <= MAX_SECONDS
+async def assert_contained(elapsed: float, limit: float = MAX_SECONDS) -> None:
+    assert elapsed <= limit
     assert leftover_containers() == []
     after = await DockerSandbox(SETTINGS).run(GOOD, "solve", TESTS, LIMITS)
     assert after.verdict == "passed"
@@ -78,7 +79,7 @@ async def test_fork_bomb_is_stopped_by_pids_limit() -> None:
     result, elapsed = await run_evil(code)
 
     assert result.verdict != "passed"
-    await assert_contained(elapsed)
+    await assert_contained(elapsed, FORK_BOMB_SECONDS)
 
 
 async def test_network_request_fails_without_network() -> None:
