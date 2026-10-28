@@ -6,7 +6,7 @@ import 'interview_models.dart';
 abstract class InterviewRepository {
   Future<InterviewSession> load(String id);
 
-  Stream<String> reply(String id, String answer);
+  Stream<ReplyEvent> reply(String id, String answer);
 
   Future<RunReport> run(String id, String code);
 }

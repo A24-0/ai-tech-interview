@@ -50,7 +50,7 @@ class InterviewSession {
   final int totalQuestions;
   final int elapsedSeconds;
   final List<DialogueMessage> messages;
-  final CodingTask task;
+  final CodingTask? task;
 }
 
 class TestCaseResult {
@@ -73,16 +73,33 @@ class TestCaseResult {
 
 class AstMetrics {
   const AstMetrics({
-    required this.complexity,
+    required this.lines,
     required this.functions,
-    required this.branches,
-    required this.maxDepth,
+    required this.loops,
+    required this.maxLoopDepth,
   });
 
-  final int complexity;
+  final int lines;
   final int functions;
-  final int branches;
-  final int maxDepth;
+  final int loops;
+  final int maxLoopDepth;
+}
+
+sealed class ReplyEvent {
+  const ReplyEvent();
+}
+
+class ReplyToken extends ReplyEvent {
+  const ReplyToken(this.text);
+
+  final String text;
+}
+
+class ReplyDone extends ReplyEvent {
+  const ReplyDone({this.task, this.finished = false});
+
+  final CodingTask? task;
+  final bool finished;
 }
 
 class RunReport {
