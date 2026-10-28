@@ -12,6 +12,22 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      TEST_DATABASE_URL: postgresql+asyncpg://app:app@localhost:5432/interview_test
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: interview_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app -d interview_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,7 +40,7 @@ jobs:
         run: python -m pytest -q
       - name: Types
         working-directory: server
-        run: python -m mypy --strict app
+        run: python -m mypy --strict --follow-imports=silent app/infrastructure/ai app/infrastructure/sandbox app/domain/ai.py app/domain/sandbox.py
       - name: Build sandbox image
         run: docker build -f sandbox/Dockerfile.runner -t interview-sandbox:latest sandbox
       - name: Runner tests

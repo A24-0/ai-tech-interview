@@ -37,10 +37,22 @@ jobs:
           docker build -f sandbox/Dockerfile.runner -t "$IMAGE_PREFIX/sandbox:${{ steps.tag.outputs.value }}" sandbox
           docker push "$IMAGE_PREFIX/sandbox:${{ steps.tag.outputs.value }}"
       - name: Build and push server image
-        if: hashFiles('server/Dockerfile') != ''
         run: |
           docker build -t "$IMAGE_PREFIX/server:${{ steps.tag.outputs.value }}" server
           docker push "$IMAGE_PREFIX/server:${{ steps.tag.outputs.value }}"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Build web client
+        working-directory: client
+        run: |
+          flutter pub get
+          flutter build web --release --dart-define=API_BASE_URL=/api
+      - name: Build and push web image
+        run: |
+          docker build -f deploy/Dockerfile.web -t "$IMAGE_PREFIX/web:${{ steps.tag.outputs.value }}" .
+          docker push "$IMAGE_PREFIX/web:${{ steps.tag.outputs.value }}"
 
   release:
     needs: build
@@ -48,13 +60,42 @@ jobs:
     steps:
       - name: Roll out over SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          TAG: ${{ needs.build.outputs.tag }}
+          PREFIX: ghcr.io/${{ github.repository }}
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          envs: TAG,PREFIX,GH_ACTOR,GH_TOKEN
           script: |
             set -e
             cd "${{ secrets.DEPLOY_PATH }}"
-            echo "${{ needs.build.outputs.tag }}" > .release
-            IMAGE_TAG="${{ needs.build.outputs.tag }}" docker compose pull
-            IMAGE_TAG="${{ needs.build.outputs.tag }}" docker compose up -d
+            PREVIOUS=$(cat .release 2>/dev/null || true)
+            echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
+            rollout() {
+              export SERVER_IMAGE="$PREFIX/server:$1" WEB_IMAGE="$PREFIX/web:$1"
+              docker pull "$PREFIX/sandbox:$1"
+              docker tag "$PREFIX/sandbox:$1" interview-sandbox:latest
+              docker compose -f deploy/docker-compose.yml --env-file deploy/.env pull api worker web
+              docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d --no-build
+            }
+            healthy() {
+              for i in $(seq 1 30); do
+                curl -fsS "http://localhost:$(grep -E '^WEB_PORT=' deploy/.env | cut -d= -f2 || echo 8080)/api/openapi.json" > /dev/null && return 0
+                sleep 5
+              done
+              return 1
+            }
+            rollout "$TAG"
+            if healthy; then
+              echo "$TAG" > .release
+            elif [ -n "$PREVIOUS" ]; then
+              echo "release $TAG is unhealthy, rolling back to $PREVIOUS"
+              rollout "$PREVIOUS"
+              exit 1
+            else
+              exit 1
+            fi
