@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install server
-        run: pip install -e "server[dev]" mypy
+        run: pip install -e "server[dev]"
       - name: Server tests
         working-directory: server
         run: python -m pytest -q
