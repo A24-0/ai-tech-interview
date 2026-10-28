@@ -1,5 +1,6 @@
 # Stack of the stand: docker compose --env-file .env up -d (from the deploy/ directory).
 # The sandbox image is built separately, see deploy/README.md.
+# The web image needs client/build/web: flutter build web --release --dart-define=API_BASE_URL=/api
 name: ai-tech-interview
 
 services:
@@ -17,6 +18,46 @@ services:
       timeout: 3s
       retries: 10
     networks: [backend]
+    restart: unless-stopped
+
+  # REST API: applies migrations, loads the question bank (idempotent) and serves /api.
+  api:
+    build: ../server
+    image: interview-server:latest
+    command:
+      - sh
+      - -c
+      - >-
+        alembic upgrade head
+        && python -m app.scripts.import_bank content/seed/python_basics.json content/tasks/python_basics.json
+        && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers
+    env_file: .env
+    volumes:
+      - ../content:/srv/content:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/openapi.json')"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+    networks: [backend, edge]
+    restart: unless-stopped
+
+  # Static Flutter web client and the /api proxy: the only service published to the outside.
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+    image: interview-web:latest
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [edge]
     restart: unless-stopped
 
   # Background worker: takes code runs from the queue in PostgreSQL and starts sandbox
@@ -59,6 +100,7 @@ services:
 
 networks:
   backend:
+  edge:
   sandbox-control:
     internal: true
 
