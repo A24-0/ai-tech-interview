@@ -32,6 +32,10 @@ server/.venv/bin/python -m pytest sandbox/tests -q
 
 Переменные окружения AI-слоя и песочницы перечислены в `server/.env.example`. Без них работают заглушки: `LLM_PROVIDER=fake`, `SANDBOX_BACKEND=fake`.
 
+## Демо
+
+Веб-клиент публикуется на GitHub Pages при каждом изменении `client/` в ветке `develop`: https://a24-0.github.io/ai-tech-interview/. Данные в демо вымышленные, вход демо-аккаунтом `demo@interview.dev` / `demo123`.
+
 ## Запуск клиента
 
 ```bash
