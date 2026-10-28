@@ -23,7 +23,7 @@ services:
   # REST API: applies migrations, loads the question bank (idempotent) and serves /api.
   api:
     build: ../server
-    image: interview-server:latest
+    image: ${SERVER_IMAGE:-interview-server:latest}
     command:
       - sh
       - -c
@@ -51,7 +51,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.web
-    image: interview-web:latest
+    image: ${WEB_IMAGE:-interview-web:latest}
     ports:
       - "${WEB_PORT:-8080}:80"
     depends_on:
@@ -64,7 +64,7 @@ services:
   # containers through docker-socket-proxy. Same image as the API, different command.
   worker:
     build: ../server
-    image: interview-server:latest
+    image: ${SERVER_IMAGE:-interview-server:latest}
     command: ["python", "-m", "app.worker"]
     env_file: .env
     environment:
