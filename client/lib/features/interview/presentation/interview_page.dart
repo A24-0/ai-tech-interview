@@ -71,8 +71,9 @@ class _InterviewPageState extends ConsumerState<InterviewPage> {
     final user = ref.watch(authControllerProvider).user;
     final session = state.session;
 
-    if (session != null && !_codeReady) {
-      _code.text = session.task.starterCode;
+    final task = state.task;
+    if (task != null && !_codeReady) {
+      _code.text = task.starterCode;
       _codeReady = true;
     }
     ref.listen(interviewControllerProvider(_id).select((s) => s.error), (
@@ -182,7 +183,8 @@ class _InterviewPageState extends ConsumerState<InterviewPage> {
     InterviewController controller,
   ) {
     final c = context.colors;
-    final task = session.task;
+    final task = state.task;
+    if (task == null) return const _TaskPending();
     return Column(
       children: [
         Container(
@@ -462,6 +464,43 @@ class _NotesTab extends StatelessWidget {
         decoration: const InputDecoration(
           hintText:
               'Scratchpad: jot down edge cases and ideas. Notes stay private.',
+        ),
+      ),
+    );
+  }
+}
+
+class _TaskPending extends StatelessWidget {
+  const _TaskPending();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      color: c.surface,
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.code, size: 36, color: c.textFaint),
+              const SizedBox(height: 14),
+              Text(
+                'The coding task appears after the theory part',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Answer the interviewer\'s questions in the dialogue. When the practice part starts, the task and the editor open here.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
         ),
       ),
     );

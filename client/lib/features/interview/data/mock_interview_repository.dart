@@ -23,10 +23,10 @@ class MockInterviewRepository implements InterviewRepository {
   final Duration tokenDelay;
 
   static const _astMetrics = AstMetrics(
-    complexity: 3,
+    lines: 11,
     functions: 1,
-    branches: 2,
-    maxDepth: 3,
+    loops: 1,
+    maxLoopDepth: 1,
   );
 
   @override
@@ -72,7 +72,7 @@ class MockInterviewRepository implements InterviewRepository {
   }
 
   @override
-  Stream<String> reply(String id, String answer) async* {
+  Stream<ReplyEvent> reply(String id, String answer) async* {
     const words = [
       'Thanks,',
       'that',
@@ -100,8 +100,9 @@ class MockInterviewRepository implements InterviewRepository {
     ];
     for (final word in words) {
       await Future<void>.delayed(tokenDelay);
-      yield '$word ';
+      yield ReplyToken('$word ');
     }
+    yield const ReplyDone();
   }
 
   @override
