@@ -74,7 +74,9 @@ class _TestConsoleState extends State<TestConsole> {
                       report.error == null) ...[
                     const SizedBox(width: 10),
                     Text(
-                      '${report.totalMs} ms  ·  ${report.memoryMb} MB',
+                      report.memoryMb > 0
+                          ? '${report.totalMs} ms  ·  ${report.memoryMb} MB'
+                          : '${report.totalMs} ms',
                       style: monoStyle(context, size: 11, color: c.textMuted),
                     ),
                   ],
@@ -230,10 +232,10 @@ class _MetricsBar extends StatelessWidget {
             'AST metrics',
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
           ),
-          item('Complexity', metrics.complexity),
+          item('Lines', metrics.lines),
           item('Functions', metrics.functions),
-          item('Branches', metrics.branches),
-          item('Max depth', metrics.maxDepth),
+          item('Loops', metrics.loops),
+          item('Loop depth', metrics.maxLoopDepth),
         ],
       ),
     );
