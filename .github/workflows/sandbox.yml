@@ -7,7 +7,7 @@ on:
       - "sandbox/**"
       - ".github/workflows/sandbox.yml"
   push:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   tests:
