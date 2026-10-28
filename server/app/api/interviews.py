@@ -32,7 +32,7 @@ from app.api.schemas.interviews import (
     StartInterviewIn,
     TaskOut,
 )
-from app.api.stub_store import store
+from app.infrastructure.db.run_queue import cancel_runs_for_session
 from app.domain.interview import DomainError, state_of
 from app.infrastructure.db.models import CodeTask, InterviewSession, Message, Question
 from app.infrastructure.db.repositories import SqlAlchemyInterviewRepository
@@ -374,7 +374,7 @@ async def _answer(
         saved = True
         finished = step == "finish" or closed_meanwhile
         if finished:
-            _cancel_runs(session.id)
+            await _cancel_runs(factory, session.id)
         yield _sse(
             "done",
             {
@@ -390,11 +390,10 @@ async def _answer(
                 await _release_turn(factory, session.id, lease)
 
 
-def _cancel_runs(session_id: uuid.UUID) -> None:
-    # TODO(S3-Y3): call cancel_runs_for_session(db, session_id) from
-    # app/infrastructure/db/run_queue.py in the finishing transaction once the runs queue is in main.
-    for run in store.runs_for_session(session_id):
-        run.cancelled = True
+async def _cancel_runs(factory: async_sessionmaker[AsyncSession], session_id: uuid.UUID) -> None:
+    async with factory() as db:
+        await cancel_runs_for_session(db, session_id)
+        await db.commit()
 
 
 @router.post("/{session_id}/finish", response_model=FinishOut)
@@ -410,5 +409,5 @@ async def finish_interview(session_id: uuid.UUID, user_id: CurrentUserId, factor
             session.status = status
             session.finished_at = datetime.now(UTC)
             await db.commit()
-    _cancel_runs(session_id)
+    await _cancel_runs(factory, session_id)
     return FinishOut(id=session_id, status="finished")

@@ -1,74 +1,33 @@
 # Copyright (c) 2026 AI Tech Interview authors. All rights reserved.
 # Proprietary and confidential. See LICENSE in the project root.
-"""Run schemas, contract sections 6.2-6.4."""
+"""Request and response bodies of the code run endpoints (contract, section 6.2)."""
 
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Any
 
 from pydantic import Field
 
 from app.domain.base import CamelModel
+from app.domain.code_runs import MAX_CODE_CHARS, RunStatus
 
 
-class RunIn(CamelModel):
-    code: str = Field(min_length=1, max_length=100_000)
+class RunCreate(CamelModel):
+    code: str = Field(min_length=1, max_length=MAX_CODE_CHARS)
     client_run_id: uuid.UUID
 
 
-class RunCreatedOut(CamelModel):
+class RunAccepted(CamelModel):
     run_id: uuid.UUID
-    status: Literal["queued"]
-
-
-class TestCaseResultOut(CamelModel):
-    name: str
-    passed: bool
-    input: str
-    expected: str
-    actual: str
-    time_ms: int
-    error: str | None = None
-
-
-class CodeMetricsOut(CamelModel):
-    lines: int
-    functions: int
-    loops: int
-    max_loop_depth: int
-    recursion: bool
-    uses_builtins_sort: bool
-
-
-class RunResultOut(CamelModel):
-    verdict: Literal["passed", "failed", "error", "timeout"]
-    passed: int
-    total: int
-    tests: list[TestCaseResultOut]
-    stdout: str
-    stderr: str
-    truncated: bool
-    metrics: CodeMetricsOut
-
-
-class CodeIssueOut(CamelModel):
-    line: int
-    severity: Literal["error", "warning", "info"]
-    text: str
-
-
-class CodeReviewOut(CamelModel):
-    summary: str
-    issues: list[CodeIssueOut]
-    suggestions: list[str]
+    status: RunStatus
 
 
 class RunOut(CamelModel):
     run_id: uuid.UUID
-    status: Literal["queued", "running", "done", "failed", "cancelled"]
+    status: RunStatus
     code_hash: str
     created_at: datetime
-    finished_at: datetime | None = None
-    result: RunResultOut | None = None
-    ai_review: CodeReviewOut | None = None
-    error: str | None = None
+    finished_at: datetime | None
+    result: dict[str, Any] | None = Field(description="RunResult (contract 6.3); null until status is done")
+    ai_review: dict[str, Any] | None = Field(description="CodeReview (contract 6.4); null until it is ready")
+    error: str | None

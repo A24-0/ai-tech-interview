@@ -3,6 +3,7 @@
 """Async engine and session factory configured from DATABASE_URL."""
 
 import os
+from collections.abc import AsyncIterator
 from functools import cache
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
@@ -27,3 +28,8 @@ def get_session_factory() -> async_sessionmaker[AsyncSession]:
     """FastAPI dependency: one engine per process. Endpoints open short sessions from it,
     so a streamed answer never keeps a transaction open while the model is talking."""
     return make_session_factory(make_engine())
+
+
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async with get_session_factory()() as session:
+        yield session

@@ -12,7 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.pool import StaticPool
 
 from app.api.interview_ai import NextStep, QuestionRef, StandInInterviewer, Turn, get_interviewer
-from app.api.stub_store import store
 from app.infrastructure.db.base import Base
 from app.infrastructure.db.models import CodeTask, Question, Topic
 from app.infrastructure.db.session import get_session_factory, make_session_factory
@@ -60,7 +59,6 @@ def interviewer() -> FlakyInterviewer:
 
 @pytest.fixture
 async def client(factory: Factory, interviewer: FlakyInterviewer) -> AsyncIterator[httpx.AsyncClient]:
-    store.runs.clear()
     app = create_app()
     app.dependency_overrides[get_session_factory] = lambda: factory
     app.dependency_overrides[get_interviewer] = lambda: interviewer

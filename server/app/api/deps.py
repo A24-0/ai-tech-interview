@@ -10,7 +10,7 @@ from fastapi import Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.api.errors import ApiError
-from app.infrastructure.db.session import get_session_factory
+from app.infrastructure.db.session import get_session, get_session_factory
 
 _NAMESPACE = uuid.UUID("5d3f1c0e-8a1b-4c55-9b0a-2f6f0c1d7a11")
 
@@ -25,8 +25,13 @@ def _bearer_token(authorization: str | None) -> str:
 
 
 async def get_current_user_id(authorization: Annotated[str | None, Header()] = None) -> uuid.UUID:
-    """Stub: any Bearer token identifies a user; the same token is the same user."""
-    return uuid.uuid5(_NAMESPACE, _bearer_token(authorization))
+    """Stub: any Bearer token identifies a user; the same token is the same user.
+    A token that is itself a UUID is taken as the user id."""
+    token = _bearer_token(authorization)
+    try:
+        return uuid.UUID(token)
+    except ValueError:
+        return uuid.uuid5(_NAMESPACE, token)
 
 
 async def require_admin(authorization: Annotated[str | None, Header()] = None) -> uuid.UUID:
@@ -41,3 +46,4 @@ async def require_admin(authorization: Annotated[str | None, Header()] = None) -
 CurrentUserId = Annotated[uuid.UUID, Depends(get_current_user_id)]
 AdminUserId = Annotated[uuid.UUID, Depends(require_admin)]
 SessionFactory = Annotated[async_sessionmaker[AsyncSession], Depends(get_session_factory)]
+DbSession = Annotated[AsyncSession, Depends(get_session)]

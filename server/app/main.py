@@ -12,7 +12,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="AI Tech Interview API")
     install_error_handlers(app)
     app.include_router(interviews.router, prefix="/api")
-    app.include_router(runs.router, prefix="/api")
+    app.include_router(runs.router)
     app.include_router(admin.router, prefix="/api")
     return app
 
